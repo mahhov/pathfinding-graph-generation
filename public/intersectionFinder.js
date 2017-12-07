@@ -1,12 +1,13 @@
 let intersects = (map, start, end) => {
-    let totalMoved = 0;
-    let totalToMove = Math.sqrt((end.x - start.x) * (end.x - start.x), (end.y - start.y) * (end.y - start.y));
-
     let x = start.x + .5;
     let y = start.y + .5;
 
     let dirX = end.x - start.x;
     let dirY = end.y - start.y;
+
+    let totalMoved = 0;
+    let totalToMove = Math.sqrt(dirX * dirX + dirY * dirY);
+
     dirX /= totalToMove;
     dirY /= totalToMove;
 
@@ -38,5 +39,5 @@ let getMove = (pos, dir) => {
 };
 
 let isMoveable = (map, x, y) => {
-    return x >= 0 && x < map.length && y >= 0 && y < map[0].length && !map[x][y];
+    return x >= 0 && x < map.length && y >= 0 && y < map[0].length && map[x][y] !== 1;
 };

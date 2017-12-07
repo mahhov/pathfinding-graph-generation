@@ -18,15 +18,15 @@ let astarMain = (map, start, end) => {
                 let left = modifyCoordinate(current, -1, 0);
                 let right = modifyCoordinate(current, 1, 0);
 
-                let touchCurrent = map[current.x][current.y];
-                let touchUp = !inBounds(up) || map[up.x][up.y];
-                let touchDown = !inBounds(down) || map[down.x][down.y];
-                let touchLeft = !inBounds(left) || map[left.x][left.y];
-                let touchRight = !inBounds(right) || map[right.x][right.y];
-                let touchUpRight = !inBounds(upRight) || map[upRight.x][upRight.y];
-                let touchUpLeft = !inBounds(upLeft) || map[upLeft.x][upLeft.y];
-                let touchDownRight = !inBounds(downRight) || map[downRight.x][downRight.y];
-                let touchDownLeft = !inBounds(downLeft) || map[downLeft.x][downLeft.y];
+                let touchCurrent = map[current.x][current.y] === 1;
+                let touchUp = !inBounds(up) || map[up.x][up.y] === 1;
+                let touchDown = !inBounds(down) || map[down.x][down.y] === 1;
+                let touchLeft = !inBounds(left) || map[left.x][left.y] === 1;
+                let touchRight = !inBounds(right) || map[right.x][right.y] === 1;
+                let touchUpRight = !inBounds(upRight) || map[upRight.x][upRight.y] === 1;
+                let touchUpLeft = !inBounds(upLeft) || map[upLeft.x][upLeft.y] === 1;
+                let touchDownRight = !inBounds(downRight) || map[downRight.x][downRight.y] === 1;
+                let touchDownLeft = !inBounds(downLeft) || map[downLeft.x][downLeft.y] === 1;
 
                 let specialUpRight = (touchUpRight && !touchUp && !touchRight);
                 let specialUpLeft = (touchUpLeft && !touchUp && !touchLeft);
@@ -48,6 +48,8 @@ let astarMain = (map, start, end) => {
         _.each(graph, (nodeA, i) => {
             _.times(i, (j) => {
                 let nodeB = graph[j];
+                if (nodeB === start && nodeA === end)
+                    console.log('hes')
                 if (!intersects(map, nodeA.coord, nodeB.coord))
                     addEdge(nodeA, nodeB);
             });
@@ -61,6 +63,7 @@ let astarMain = (map, start, end) => {
     };
 
     let addEdge = (nodeA, nodeB) => {
+        //console.log('edge added');
         let dx = nodeA.coord.x - nodeB.coord.x;
         let dy = nodeA.coord.y - nodeB.coord.y;
         let distance = Math.sqrt(dx * dx + dy * dy);
@@ -146,5 +149,8 @@ let astarMain = (map, start, end) => {
     createGraphNodes();
     createGraphEdges();
     prepareAStar();
-    return _.pluck(aStar(), 'coord');
+    return {
+        path: _.pluck(aStar(), 'coord'),
+        graph: graph
+    };
 };

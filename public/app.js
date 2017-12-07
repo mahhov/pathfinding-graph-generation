@@ -9,10 +9,11 @@ let rect, startCoord, goalCoord;
 
 let mouseDown;
 let empty = 0, wall = 1, start = 2, goal = 3;
+let pathNode = 4, graphNode = 5, graphEdge = 6;
 let draw = empty;
-let drawColors = ['#bbb', '#555', '#0b0', '#b00'];
+let drawColors = ['#bbb', '#555', '#0b0', '#b00', '#fff', '#00b', '#0dd'];
 
-let path;
+let path, graph;
 
 let initCanvas = () => {
     let canvas = document.getElementById('myCanvas');
@@ -65,19 +66,41 @@ let randInt = (min, max) => {
 };
 
 let update = () => {
-    if (startCoord && goalCoord)
-        path = astarMain(rect, startCoord, goalCoord);
-    console.log(path);
+    if (startCoord && goalCoord) {
+        let aStar = astarMain(rect, startCoord, goalCoord);
+        path = aStar.path;
+        graph = aStar.graph;
+    }
     refreshCanvas();
 };
 
 let refreshCanvas = () => {
+    // draw map
     drawCanvasClear();
     _.each(rect, (column, x) => {
         _.each(column, (cell, y) => {
-            let rect = createRect(x, y);
-            drawCanvasRect(rect, drawColors[cell], true);
+            drawCanvasRect(createRect(x, y), drawColors[cell], true);
         });
+    });
+
+    // draw graph nodes
+    _.each(graph, (node) => {
+        drawCanvasRect(createRectSmall(node.coord.x, node.coord.y), drawColors[graphNode], true)
+    });
+
+    // draw graph edges
+    _.each(graph, (node) => {
+        _.each(node.connected, (connected) => {
+            drawLine(createLine(node.coord.x, node.coord.y, connected.neighbor.coord.x, connected.neighbor.coord.y), drawColors[graphEdge], 1);
+        });
+    });
+
+    // draw path
+    _.times(path.length - 1, (i) => {
+        drawLine(createLine(path[i].x, path[i].y, path[i + 1].x, path[i + 1].y), drawColors[pathNode], 5);
+    });
+    _.each(path, (coord) => {
+        drawCanvasRect(createRectSmall(coord.x, coord.y), drawColors[pathNode], true)
     });
 };
 
@@ -87,6 +110,24 @@ let createRect = (x, y) => {
         y: y * rectHeight,
         width: rectWidth,
         height: rectHeight
+    };
+};
+
+let createRectSmall = (x, y) => {
+    return {
+        x: (x + .25) * rectWidth,
+        y: (y + .25) * rectHeight,
+        width: rectWidth * .5,
+        height: rectHeight * .5
+    };
+};
+
+let createLine = (x1, y1, x2, y2) => {
+    return {
+        x1: (x1 + .5) * rectWidth,
+        y1: (y1 + .5) * rectHeight,
+        x2: (x2 + .5) * rectWidth,
+        y2: (y2 + .5) * rectHeight
     };
 };
 
@@ -139,9 +180,26 @@ let drawCanvasRect = (rect, color, fill) => {
     }
 };
 
+let drawLine = (line, color, width) => {
+    ctx.strokeStyle = color;
+    ctx.lineWidth = width;
+    ctx.beginPath();
+    ctx.moveTo(line.x1, line.y1);
+    ctx.lineTo(line.x2, line.y2);
+    ctx.stroke();
+};
+
 // --- input ---
 let eraseRect = () => {
     initRect(0);
+    _.times(width, (x) => {
+        rect[x][0] = wall;
+        rect[x][height - 1] = wall;
+    });
+    _.times(height, (y) => {
+        rect[0][y] = wall;
+        rect[width - 1][y] = wall;
+    });
     update();
 }
 
