@@ -1,3 +1,17 @@
+<script src="scripts/underscore/underscore.js"></script>
 <script src="app.js"></script>
 
-<canvas #myCanvas width='500' height='500' onclick='handleClick(event.offsetX, event.offsetY)' style="border: 1px solid;"></canvas>
+<div style="margin-top:10px">
+    <button onclick="eraseRect()">erase all</button>
+    <button onclick="setDraw(start)">set start</button>
+    <button onclick="setDraw(goal)">set goal</button>
+</div>
+
+<div style="margin-top:30px">
+    <canvas id="myCanvas"
+        onmousedown="handleMouseDown(event.offsetX, event.offsetY)"
+        onmouseup="handleMouseUp()"
+        onmousemove="handleMouseMove(event.offsetX, event.offsetY)"
+        style="border: 1px solid;">
+    </canvas>
+</div>
