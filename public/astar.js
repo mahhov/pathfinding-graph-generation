@@ -35,7 +35,7 @@ let astarMain = (map, start, end) => {
                 let special = specialUpRight || specialUpLeft || specialDownRight || specialDownLeft;
                 let side = x === 0 || x === width - 1 || y === 0 || y === height - 1;
 
-                if (!touchCurrent && (special || side))
+                if (!touchCurrent && special)
                     addNode(current);
             });
         });

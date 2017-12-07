@@ -47,7 +47,7 @@ let initRect = (density) => {
 };
 
 let init = () => {
-    initRect(.3);
+    initRect(0);
     window.onload = initCanvas;
 };
 
@@ -190,16 +190,13 @@ let drawLine = (line, color, width) => {
 };
 
 // --- input ---
-let eraseRect = () => {
+let emptyMap = () => {
     initRect(0);
-    _.times(width, (x) => {
-        rect[x][0] = wall;
-        rect[x][height - 1] = wall;
-    });
-    _.times(height, (y) => {
-        rect[0][y] = wall;
-        rect[width - 1][y] = wall;
-    });
+    update();
+};
+
+let randomMap = () => {
+    initRect(.3);
     update();
 }
 
