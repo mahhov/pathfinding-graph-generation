@@ -5,6 +5,9 @@ let intersects = (map, start, end) => {
     let dirX = end.x - start.x;
     let dirY = end.y - start.y;
 
+    let checkDx = dirX < 0 ? .5 : -.5;
+    let checkDy = dirY < 0 ? .5 : -.5;
+
     let totalMoved = 0;
     let totalToMove = Math.sqrt(dirX * dirX + dirY * dirY);
 
@@ -24,7 +27,9 @@ let intersects = (map, start, end) => {
         x += dirX * move;
         y += dirY * move;
 
-        if (!isMoveable(map, parseInt(x), parseInt(y)))
+        if (!isMoveable(map, parseInt(x), parseInt(y)) ||
+            !isMoveable(map, parseInt(x + checkDx), parseInt(y)) ||
+            !isMoveable(map, parseInt(x), parseInt(y + checkDy)))
             return true;
     }
 };

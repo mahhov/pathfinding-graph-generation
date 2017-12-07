@@ -48,8 +48,6 @@ let astarMain = (map, start, end) => {
         _.each(graph, (nodeA, i) => {
             _.times(i, (j) => {
                 let nodeB = graph[j];
-                if (nodeB === start && nodeA === end)
-                    console.log('hes')
                 if (!intersects(map, nodeA.coord, nodeB.coord))
                     addEdge(nodeA, nodeB);
             });
