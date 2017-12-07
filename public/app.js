@@ -5,7 +5,7 @@ let ctx;
 let canvasWidth = 800, canvasHeight = 800;
 let width = 20, height = 20;
 let rectWidth = canvasWidth / width, rectHeight = canvasHeight / height;
-let rect = [], startCoord, goalCoord;
+let rect, startCoord, goalCoord;
 
 let mouseDown;
 let empty = 0, wall = 1, start = 2, goal = 3;
@@ -17,21 +17,22 @@ let initCanvas = () => {
     ctx = canvas.getContext('2d');
     canvas.width = canvasWidth;
     canvas.height = canvasHeight;
-    refreshCanvas();
+    update();
 };
 
-let initRect = () => {
+let initRect = (density) => {
+    rect = [];
     _.times(width, () => {
         let column = [];
         rect.push(column);
         _.times(width, () => {
-            column.push(randBoolean(.3) ? wall : empty);
+            column.push(randBoolean(density) ? wall : empty);
         });
     });
 };
 
 let init = () => {
-    initRect();
+    initRect(.3);
     window.onload = initCanvas;
 };
 
@@ -43,6 +44,12 @@ let randBoolean = (trueWeight) => {
 
 let randDouble = (min, max) => {
     return Math.random() * (max - min) + min;
+};
+
+let update = () => {
+    if (startCoord && endCoord)
+        astarMain(rect, startCoord, goalCoord);
+    refreshCanvas();
 };
 
 let refreshCanvas = () => {
@@ -80,13 +87,14 @@ let setRect = (coord, value) => {
         if (startCoord)
             rect[startCoord.x][startCoord.y] = empty;
         startCoord = coord;
-    }
-
-    if (value === goal) {
+    } else if (value === goal) {
         if (goalCoord)
             rect[goalCoord.x][goalCoord.y] = empty;
         goalCoord = coord;
-    }
+    } else if (coord === startCoord)
+        startCoord = null;
+    else if (coord === goalCoord)
+        goalCoord = null;
 
     rect[coord.x][coord.y] = value;
 }
@@ -113,6 +121,10 @@ let drawCanvasRect = (rect, color, fill) => {
 };
 
 // --- input ---
+let eraseRect = () => {
+    initRect(0);
+    update();
+}
 
 let handleMouseDown = (x, y) => {
     mouseDown = true;
@@ -129,7 +141,7 @@ let handleMouseUp  = () => {
 let handleMouseMove = (x, y) => {
     if (mouseDown) {
         setRect(getCoord(x, y), draw);
-        refreshCanvas();
+        update();
     }
 };
 

@@ -1,6 +1,6 @@
 var _ = require('underscore');
 
-function main() {
+function astarMain(map, start, end) {
   graph = [];
   nodeStart = addNode('nodeStart', 0);
   nodeA = addNode('nodeA', 9);
@@ -86,5 +86,3 @@ function reconstructPath(current) {
   }
   return totalPath;
 }
-
-main();
