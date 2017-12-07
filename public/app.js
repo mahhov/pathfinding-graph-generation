@@ -12,6 +12,8 @@ let empty = 0, wall = 1, start = 2, goal = 3;
 let draw = empty;
 let drawColors = ['#bbb', '#555', '#0b0', '#b00'];
 
+let path;
+
 let initCanvas = () => {
     let canvas = document.getElementById('myCanvas');
     ctx = canvas.getContext('2d');
@@ -29,6 +31,18 @@ let initRect = (density) => {
             column.push(randBoolean(density) ? wall : empty);
         });
     });
+
+    startCoord = {
+        x: randInt(0, width),
+        y: randInt(0, height)
+    };
+    setRect(startCoord, start);
+
+    goalCoord = {
+        x: randInt(0, width),
+        y: randInt(0, height)
+    };
+    setRect(goalCoord, goal);
 };
 
 let init = () => {
@@ -46,9 +60,14 @@ let randDouble = (min, max) => {
     return Math.random() * (max - min) + min;
 };
 
+let randInt = (min, max) => {
+    return parseInt(Math.random() * (max - min)) + min;
+};
+
 let update = () => {
-    if (startCoord && endCoord)
-        astarMain(rect, startCoord, goalCoord);
+    if (startCoord && goalCoord)
+        path = astarMain(rect, startCoord, goalCoord);
+    console.log(path);
     refreshCanvas();
 };
 

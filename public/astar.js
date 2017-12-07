@@ -1,88 +1,150 @@
-var _ = require('underscore');
+let astarMain = (map, start, end) => {
+    let width = map.length;
+    let height = map[0].length;
+    let graph;
+    let openCount;
 
-function astarMain(map, start, end) {
-  graph = [];
-  nodeStart = addNode('nodeStart', 0);
-  nodeA = addNode('nodeA', 9);
-  nodeB = addNode('nodeB', 10);
-  nodeEnd = addNode('nodeEnd', 0);
+    let createGraphNodes = () => {
+        graph = [];
+        _.each(map, (column, x) => {
+            _.each(column, (cell, y) => {
+                let current = makeCoordinate(x, y);
+                let upRight = modifyCoordinate(current, 1, -1);
+                let upLeft = modifyCoordinate(current, -1, -1);
+                let downRight = modifyCoordinate(current, 1, 1);
+                let downLeft = modifyCoordinate(current, -1, 1);
+                let up = modifyCoordinate(current, 0, -1);
+                let down = modifyCoordinate(current, 0, 1);
+                let left = modifyCoordinate(current, -1, 0);
+                let right = modifyCoordinate(current, 1, 0);
 
-  connect(nodeStart, nodeA, 1);
-  connect(nodeStart, nodeB, 4);
-  connect(nodeA, nodeB, 1);
-  connect(nodeB, nodeEnd, 50);
+                let touchCurrent = map[current.x][current.y];
+                let touchUp = !inBounds(up) || map[up.x][up.y];
+                let touchDown = !inBounds(down) || map[down.x][down.y];
+                let touchLeft = !inBounds(left) || map[left.x][left.y];
+                let touchRight = !inBounds(right) || map[right.x][right.y];
+                let touchUpRight = !inBounds(upRight) || map[upRight.x][upRight.y];
+                let touchUpLeft = !inBounds(upLeft) || map[upLeft.x][upLeft.y];
+                let touchDownRight = !inBounds(downRight) || map[downRight.x][downRight.y];
+                let touchDownLeft = !inBounds(downLeft) || map[downLeft.x][downLeft.y];
 
-  path = aStar(graph, nodeStart, nodeEnd);
+                let specialUpRight = (touchUpRight && !touchUp && !touchRight);
+                let specialUpLeft = (touchUpLeft && !touchUp && !touchLeft);
+                let specialDownRight = (touchDownRight && !touchDown && !touchRight);
+                let specialDownLeft = (touchDownLeft && !touchDown && !touchLeft);
+                let special = specialUpRight || specialUpLeft || specialDownRight || specialDownLeft;
+                let side = x === 0 || x === width - 1 || y === 0 || y === height - 1;
 
-  console.log(path);
-}
+                if (!touchCurrent && (special || side))
+                    addNode(current);
+            });
+        });
 
-function addNode(name, h) {
-  node = {name: name, h: h, connected: []};
-  graph.push(node);
-  return node
-}
+        start = addNode(start);
+        end = addNode(end);
+    };
 
-function connect(nodeA, nodeB, distance) {
-  nodeA.connected.push({neighbor: nodeB, distance: distance});
-  nodeB.connected.push({neighbor: nodeA, distance: distance});
-}
+    let createGraphEdges = () => {
+        _.each(graph, (nodeA, i) => {
+            _.times(i, (j) => {
+                let nodeB = graph[j];
+                if (!intersects(map, nodeA.coord, nodeB.coord))
+                    addEdge(nodeA, nodeB);
+            });
+        });
+    };
 
-function aStar(graph, start, goal) {
-  _.each(graph, node => {
-    node.g = Infinity;
-    node.f = Infinity;
-    node.open = false;
-    node.closed = false;
-  });
+    let addNode = (coord) => {
+        let node = {coord: coord, connected: []};
+        graph.push(node);
+        return node;
+    };
 
-  start.g = 0;
-  start.f = start.h;
-  start.open = true;
-  openCount = 1
+    let addEdge = (nodeA, nodeB) => {
+        let dx = nodeA.coord.x - nodeB.coord.x;
+        let dy = nodeA.coord.y - nodeB.coord.y;
+        let distance = Math.sqrt(dx * dx + dy * dy);
+        nodeA.connected.push({neighbor: nodeB, distance: distance});
+        nodeB.connected.push({neighbor: nodeA, distance: distance});
+    };
 
-  while (openCount > 0) {
-    current = null;
-    _.each(graph, (node) => {
-      if (node.open && (!current || node.f < current.f))
-      current = node;
-    });
+    let inBounds = (coord) => {
+        return coord.x >= 0 && coord.x < width && coord.y >= 0 && coord.y < height;
+    };
 
-    if (current === goal)
-      return reconstructPath(current);
+    let prepareAStar = () => {
+        _.each(graph, node => {
+            node.g = Infinity;
+            node.f = Infinity;
+            node.open = false;
+            node.closed = false;
+        });
 
-    openCount--;
-    current.open = false;
-    current.closed = true;
+        start.g = 0;
+        start.f = start.h = getH(start.coord);
+        start.open = true;
+        openCount = 1
+    };
 
-    _.each(current.connected, connection => {
-      if (connection.neighbor.closed)
-        return;
+    let aStar = () => {
+        while (openCount > 0) {
+            current = getNodeWithSmallestF();
 
-      if (!connection.neighbor.open) {
-        openCount++;
-        connection.neighbor.open = true;
-      }
+            if (current === end)
+                return reconstructPath(current);
 
-      g = current.g + connection.distance;
-      if (g >= connection.neighbor.g)
-        return;
+            openCount--;
+            current.open = false;
+            current.closed = true;
 
-      connection.neighbor.cameFrom = current;
-      connection.neighbor.g = g;
-      connection.neighbor.f = g + connection.neighbor.h;
-    });
+            _.each(current.connected, connection => {
+                if (connection.neighbor.closed)
+                    return;
 
-  }
+                if (!connection.neighbor.open) {
+                    openCount++;
+                    connection.neighbor.open = true;
+                }
 
-  return null;
-}
+                g = current.g + connection.distance;
+                if (g >= connection.neighbor.g)
+                    return;
 
-function reconstructPath(current) {
-  totalPath = [current.name];
-  while (current.cameFrom) {
-    current = current.cameFrom;
-    totalPath.push(current.name);
-  }
-  return totalPath;
-}
+                connection.neighbor.cameFrom = current;
+                connection.neighbor.g = g;
+                connection.neighbor.f = g + getH(connection.neighbor.coord);
+            });
+        }
+
+        return null;
+    };
+
+    let getNodeWithSmallestF = () => {
+        let current = null;
+        _.each(graph, (node) => {
+            if (node.open && (!current || node.f < current.f))
+                current = node;
+        });
+        return current;
+    };
+
+    let getH = (coord) => {
+        let dx = coord.x - end.x;
+        let dy = coord.y - end.y;
+        return Math.sqrt(dx * dx + dy * dy);
+    };
+
+    let reconstructPath = (current) => {
+        let totalPath = [current];
+        while (current.cameFrom) {
+            current = current.cameFrom;
+            totalPath.push(current);
+        }
+        return totalPath;
+    };
+
+    createGraphNodes();
+    createGraphEdges();
+    prepareAStar();
+    return _.pluck(aStar(), 'coord');
+};
