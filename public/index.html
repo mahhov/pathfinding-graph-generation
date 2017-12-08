@@ -5,14 +5,15 @@
 <script src="intersectionFinder.js"></script>
 <script src="houseGenerator.js"></script>
 
-<div style="margin-top:10px">
+<div style="margin-top:5px">
     <button onclick="emptyMap()">empty map</button>
     <button onclick="randomMap()">random map</button>
     <button onclick="setDraw(start)">set start</button>
     <button onclick="setDraw(goal)">set goal</button>
+    <button onclick="toggleGraphOverlay()">toggle graph overlay</button>
 </div>
 
-<div style="margin-top:30px">
+<div style="margin-top:5px">
     <canvas id="myCanvas"
         onmousedown="handleMouseDown(event.offsetX, event.offsetY)"
         onmouseup="handleMouseUp()"

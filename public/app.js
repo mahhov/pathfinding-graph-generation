@@ -2,18 +2,20 @@
 
 let ctx;
 
-let canvasWidth = 800, canvasHeight = 800;
-let width = 20, height = 20;
+let canvasWidth = 1000, canvasHeight = 1000;
+let width = 50, height = 50;
 let rectWidth = canvasWidth / width, rectHeight = canvasHeight / height;
+
 let rect, startCoord, goalCoord;
+let path, graph;
 
 let mouseDown;
 let empty = 0, wall = 1, start = 2, goal = 3;
-let pathNode = 4, graphNode = 5, graphEdge = 6;
+let pathNode = 4, graphColor = 5;
 let draw = empty;
-let drawColors = ['#bbb', '#555', '#0b0', '#b00', '#fff', '#00b', '#0dd'];
-
-let path, graph;
+                // emtpy   wall    start   goal    path    graph
+let drawColors = ['#eee', '#888', '#33e', '#e33', '#050', '#099'];
+let graphOverlay = true;
 
 let initCanvas = () => {
     let canvas = document.getElementById('myCanvas');
@@ -83,24 +85,26 @@ let refreshCanvas = () => {
         });
     });
 
-    // draw graph nodes
-    _.each(graph, (node) => {
-        drawCanvasRect(createRectSmall(node.coord.x, node.coord.y), drawColors[graphNode], true)
-    });
-
-    // draw graph edges
-    _.each(graph, (node) => {
-        _.each(node.connected, (connected) => {
-            drawLine(createLine(node.coord.x, node.coord.y, connected.neighbor.coord.x, connected.neighbor.coord.y), drawColors[graphEdge], 1);
+    if (graphOverlay) {
+        // draw graph nodes
+        _.each(graph, (node) => {
+            drawCanvasRect(createRectSmall(node.coord.x, node.coord.y, .5), drawColors[graphColor], true)
         });
-    });
+
+        // draw graph edges
+        _.each(graph, (node) => {
+            _.each(node.connected, (connected) => {
+                drawLine(createLine(node.coord.x, node.coord.y, connected.neighbor.coord.x, connected.neighbor.coord.y), drawColors[graphColor], 1);
+            });
+        });
+    }
 
     // draw path
     _.times(path.length - 1, (i) => {
-        drawLine(createLine(path[i].x, path[i].y, path[i + 1].x, path[i + 1].y), drawColors[pathNode], 5);
+        drawLine(createLine(path[i].x, path[i].y, path[i + 1].x, path[i + 1].y), drawColors[pathNode], 4);
     });
     _.each(path, (coord) => {
-        drawCanvasRect(createRectSmall(coord.x, coord.y), drawColors[pathNode], true)
+        drawCanvasRect(createRectSmall(coord.x, coord.y, .5), drawColors[pathNode], true)
     });
 };
 
@@ -113,12 +117,13 @@ let createRect = (x, y) => {
     };
 };
 
-let createRectSmall = (x, y) => {
+let createRectSmall = (x, y, size) => {
+    let shift = (1 - size) / 2;
     return {
-        x: (x + .25) * rectWidth,
-        y: (y + .25) * rectHeight,
-        width: rectWidth * .5,
-        height: rectHeight * .5
+        x: (x + shift) * rectWidth,
+        y: (y + shift) * rectHeight,
+        width: rectWidth * size,
+        height: rectHeight * size
     };
 };
 
@@ -198,6 +203,11 @@ let emptyMap = () => {
 let randomMap = () => {
     initRect(.3);
     update();
+}
+
+let toggleGraphOverlay = () => {
+    graphOverlay = !graphOverlay;
+    refreshCanvas();
 }
 
 let handleMouseDown = (x, y) => {
