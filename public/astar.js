@@ -130,8 +130,8 @@ let astarMain = (map, start, end) => {
     };
 
     let getH = (coord) => {
-        let dx = coord.x - end.x;
-        let dy = coord.y - end.y;
+        let dx = coord.x - end.coord.x;
+        let dy = coord.y - end.coord.y;
         return Math.sqrt(dx * dx + dy * dy);
     };
 
