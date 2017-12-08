@@ -3,14 +3,14 @@ const app = express();
 const pgp = require('pg-promise')();
 const db = pgp(process.env.DATABASE_URL || 'postgres://manukhovanesian@localhost:5432/astar');
 
-var incrementCount = () => {
+let incrementCount = () => {
     db.none('INSERT INTO count (count) VALUES (1)').catch((err) => {
         console.log('error updateing count table:');
         console.log(err);
     });
 };
 
-var wrapper = (req, res, next) => {
+let wrapper = (req, res, next) => {
     if (req.url === '/')
         incrementCount();
     express.static(__dirname + '/public')(req, res, next);
