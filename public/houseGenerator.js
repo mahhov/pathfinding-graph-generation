@@ -94,6 +94,10 @@ let houseGenerator = (width, height) => {
                 }
             }
         });
+
+        rooms = _.filter(rooms, (room) => {
+            return room.connected;
+        });
     };
 
     //connectRooms = () => {_.each(rooms, (room) => {room.connected = true;});}
@@ -110,19 +114,18 @@ let houseGenerator = (width, height) => {
 
     let fillRoomWalls = () => {
         _.each(rooms, (room) => {
-            if (room.connected)
-                _.each(_.range(room.left + 1, room.right), (x) => {
-                    _.each(_.range(room.top + 1, room.bottom), (y) => {
-                        walls[x][y] = false;
-                    });
+            _.each(_.range(room.left + 1, room.right), (x) => {
+                _.each(_.range(room.top + 1, room.bottom), (y) => {
+                    walls[x][y] = false;
                 });
+            });
         });
     };
 
     let findSpawns = () => {
         spawns = [];
         _.times(2, (i) => {
-            spawns[i] = getRoomCoord(rooms[i]);
+            spawns.push(getRoomCoord(rooms[i]));
         });
     };
 

@@ -61,8 +61,8 @@ initRectHouse = () => {
 
     startCoord = hg.getSpawn(0);
     goalCoord = hg.getSpawn(1);
-    rect[parseInt(startCoord.x)][parseInt(startCoord.y)] = start;
-    rect[parseInt(goalCoord.x)][parseInt(goalCoord.y)] = goal;
+    rect[startCoord.x][startCoord.y] = start;
+    rect[goalCoord.x][goalCoord.y] = goal;
 };
 
 let init = () => {
