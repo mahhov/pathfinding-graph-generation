@@ -6,8 +6,8 @@ see title
 
 ## Demos
 
-![](../blob/master/gifys/empty.gif)
+![demo gif 1](../master/gifys/empty.gif)
 
-![](../blob/master/gifys/random.gif)
+![demo gif 2](../master/gifys/random.gif)
 
-![](../blob/master/gifys/whatever.gif)
+![demo gif 3](../master/gifys/whatever.gif)
