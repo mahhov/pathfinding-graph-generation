@@ -14,8 +14,8 @@ let empty = 0, wall = 1, start = 2, goal = 3;
 let pathNode = 4, graphColor = 5;
 let draw = empty;
                 // emtpy   wall    start   goal    path    graph
-let drawColors = ['#eee', '#888', '#33e', '#e33', '#050', '#099'];
-let graphOverlay = true;
+let drawColors = ['#eee', '#888', '#33d', '#d33', '#050', '#099'];
+let endpointOverlay = true, graphOverlay = true, pathOverlay = true;
 
 let initCanvas = () => {
     let canvas = document.getElementById('myCanvas');
@@ -81,14 +81,15 @@ let refreshCanvas = () => {
     drawCanvasClear();
     _.each(rect, (column, x) => {
         _.each(column, (cell, y) => {
-            drawCanvasRect(createRect(x, y), drawColors[cell], true);
+            let color = ((cell === start || cell === goal)) ? empty : cell;
+            drawCanvasRect(createRect(x, y), drawColors[color], true);
         });
     });
 
     if (graphOverlay) {
         // draw graph nodes
         _.each(graph, (node) => {
-            drawCanvasRect(createRectSmall(node.coord.x, node.coord.y, .5), drawColors[graphColor], true)
+            drawCanvasRect(createRectSmall(node.coord.x, node.coord.y, .3   ), drawColors[graphColor], true)
         });
 
         // draw graph edges
@@ -99,13 +100,20 @@ let refreshCanvas = () => {
         });
     }
 
-    // draw path
-    _.times(path.length - 1, (i) => {
-        drawLine(createLine(path[i].x, path[i].y, path[i + 1].x, path[i + 1].y), drawColors[pathNode], 4);
-    });
-    _.each(path, (coord) => {
-        drawCanvasRect(createRectSmall(coord.x, coord.y, .5), drawColors[pathNode], true)
-    });
+    if (pathOverlay) {
+        // draw path
+        _.times(path.length - 1, (i) => {
+            drawLine(createLine(path[i].x, path[i].y, path[i + 1].x, path[i + 1].y), drawColors[pathNode], 4);
+        });
+        _.each(path, (coord) => {
+            drawCanvasRect(createRectSmall(coord.x, coord.y, .3), drawColors[pathNode], true)
+        });
+    }
+
+    if (endpointOverlay) {
+        drawCanvasRect(createRect(goalCoord.x, goalCoord.y), drawColors[goal], true);
+        drawCanvasRect(createRect(startCoord.x, startCoord.y), drawColors[start], true);
+    }
 };
 
 let createRect = (x, y) => {
@@ -205,8 +213,18 @@ let randomMap = () => {
     update();
 }
 
+let toggleEndpointOverlay = () => {
+    endpointOverlay = !endpointOverlay;
+    refreshCanvas();
+}
+
 let toggleGraphOverlay = () => {
     graphOverlay = !graphOverlay;
+    refreshCanvas();
+}
+
+let togglePathOverlay = () => {
+    pathOverlay = !pathOverlay;
     refreshCanvas();
 }
 
