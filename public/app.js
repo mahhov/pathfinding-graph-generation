@@ -25,12 +25,12 @@ let initCanvas = () => {
     update();
 };
 
-let initRect = (density) => {
+let initRectRand = (density) => {
     rect = [];
     _.times(width, () => {
         let column = [];
         rect.push(column);
-        _.times(width, () => {
+        _.times(height, () => {
             column.push(randBoolean(density) ? wall : empty);
         });
     });
@@ -48,8 +48,25 @@ let initRect = (density) => {
     setRect(goalCoord, goal);
 };
 
+initRectHouse = () => {
+    let hg = houseGenerator(width, height);
+    hg.generate();
+
+    let walls = hg.getWalls();
+    rect = _.map(walls, (column) => {
+        return _.map(column, (wall) => {
+            return wall ? 1 : 0;
+        });
+    });
+
+    startCoord = hg.getSpawn(0);
+    goalCoord = hg.getSpawn(1);
+    rect[parseInt(startCoord.x)][parseInt(startCoord.y)] = start;
+    rect[parseInt(goalCoord.x)][parseInt(goalCoord.y)] = goal;
+};
+
 let init = () => {
-    initRect(0);
+    initRectHouse(0);
     window.onload = initCanvas;
 };
 
@@ -204,12 +221,17 @@ let drawLine = (line, color, width) => {
 
 // --- input ---
 let emptyMap = () => {
-    initRect(0);
+    initRectRand(0);
     update();
 };
 
 let randomMap = () => {
-    initRect(.3);
+    initRectRand(.3);
+    update();
+}
+
+let houseMap = () => {
+    initRectHouse();
     update();
 }
 

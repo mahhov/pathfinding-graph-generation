@@ -1,104 +1,149 @@
-// private static final int WIDTH = 128, HEIGHT = 128;
-// private static final int MIN_ROOM_SIZE = 5, MAX_ROOM_SIZE = 12;
-// private static final int NUM_ROOMS = 1000;
-// private static final int NUM_CONNECTIONS = 1000;
-// private Room[] rooms;
-// private int roomCount;
-// private boolean[][] walls;
-// private Coordinate[] spawns;
-//
-// public void generate() {
-//     initWalls();
-//     placeRooms();
-//     connectRooms();
-//     fillRoomWalls();
-//     findSpawns();
-// }
-//
-// private void initWalls() {
-//     walls = new boolean[WIDTH][HEIGHT];
-//     for (int x = 0; x < WIDTH; x++)
-//         for (int y = 0; y < HEIGHT; y++)
-//             walls[x][y] = true;
-// }
-//
-// private void placeRooms() {
-//     rooms = new Room[NUM_ROOMS];
-//
-//     for (int i = 0; i < NUM_ROOMS; i++) {
-//         int width = Math3D.random(MIN_ROOM_SIZE, MAX_ROOM_SIZE);
-//         int height = Math3D.random(MIN_ROOM_SIZE, MAX_ROOM_SIZE);
-//         int left = Math3D.random(0, WIDTH - width);
-//         int top = Math3D.random(0, HEIGHT - height);
-//         Room room = new Room(left, top, width, height);
-//
-//         boolean intersects = false;
-//         for (int j = 0; j < roomCount; j++)
-//             if (room.intersects(rooms[j])) {
-//                 intersects = true;
-//                 break;
-//             }
-//         if (!intersects)
-//             rooms[roomCount++] = room;
-//     }
-// }
-//
-// private void fillRoomWalls() {
-//     for (int i = 0; i < roomCount; i++)
-//         if (rooms[i].isConnected())
-//             rooms[i].empty(walls);
-// }
-//
-// private void connectRooms() {
-//     for (int i = 0; i < NUM_CONNECTIONS; i++) {
-//         int roomNum1 = Math3D.random(0, roomCount - 1);
-//         int roomNum2 = Math3D.random(0, roomCount - 2);
-//         if (roomNum1 == roomNum2)
-//             roomNum2++;
-//
-//         Room room1 = rooms[roomNum1];
-//         Room room2 = rooms[roomNum2];
-//
-//         if (room1.distance(room2) < 10) {
-//             room1.setConnected();
-//             room2.setConnected();
-//
-//             int startX = room1.getX();
-//             int startY = room1.getY();
-//             int endX = room2.getX();
-//             int endY = room2.getY();
-//             int deltaX = endX > startX ? 1 : -1;
-//             int deltaY = endY > startY ? 1 : -1;
-//             endX += deltaX;
-//             endY += deltaY;
-//
-//             if (Math3D.randBoolean(.5)) {
-//                 for (int x = startX; x != endX; x += deltaX)
-//                     walls[x][startY] = false;
-//                 endX -= deltaX;
-//                 for (int y = startY; y != endY; y += deltaY)
-//                     walls[endX][y] = false;
-//             } else {
-//                 for (int y = startY; y != endY; y += deltaY)
-//                     walls[startX][y] = false;
-//                 endY -= deltaY;
-//                 for (int x = startX; x != endX; x += deltaX)
-//                     walls[x][endY] = false;
-//             }
-//         }
-//     }
-// }
-//
-// private void findSpawns() {
-//     spawns = new Coordinate[3];
-//     for (int i = 0; i < spawns.length; i++)
-//         spawns[i] = new Coordinate(rooms[i].getX(), rooms[i].getY());
-// }
-//
-// public boolean[][] getWalls() {
-//     return walls;
-// }
-//
-// public Coordinate getSpawn(int i) {
-//     return spawns[i];
-// }
+let houseGenerator = (width, height) => {
+    let MIN_ROOM_SIZE = 4, MAX_ROOM_SIZE = 8;
+    let NUM_ROOMS = 250;
+    let NUM_CONNECTIONS = 100, MAX_CONNECTION_LENGTH = 3;
+    let rooms;
+    let walls;
+    let spawns;
+
+    let generate = () => {
+        initWalls();
+        placeRooms();
+        connectRooms();
+        fillRoomWalls();
+        findSpawns();
+    };
+
+    let initWalls = () => {
+        walls = [];
+        _.times(width, () => {
+            let column = [];
+            walls.push(column);
+            _.times(height, () => {
+                column.push(true);
+            });
+        });
+    };
+
+    let placeRooms = () => {
+        rooms = [];
+        _.times(NUM_ROOMS, () => {
+            let w = randInt(MIN_ROOM_SIZE, MAX_ROOM_SIZE);
+            let h = randInt(MIN_ROOM_SIZE, MAX_ROOM_SIZE);
+            let left = randInt(0, width - w);
+            let top = randInt(0, height - h);
+            let room = {
+                left: left,
+                top: top,
+                right: left + w,
+                bottom: top + h,
+                centerX: left + w / 2,
+                centerY: top + h / 2,
+                width: w,
+                height: h
+            };
+
+            let intersects = _.any(rooms, (room2) => {
+                return room.left <= room2.right && room.right >= room2.left && room.top <= room2.bottom && room.bottom >= room2.top;
+            });
+
+            if (!intersects)
+                rooms.push(room);
+        });
+    };
+
+    let connectRooms = () => {
+        _.times(NUM_CONNECTIONS, () => {
+            let roomNum1 = randInt(0, rooms.length - 1);
+            let roomNum2 = randInt(0, rooms.length - 2);
+            if (roomNum1 === roomNum2)
+                roomNum2++;
+
+            room1 = rooms[roomNum1];
+            room2 = rooms[roomNum2];
+
+            if (roomDistance(room1, room2) < MAX_CONNECTION_LENGTH) {
+                room1.connected = room2.connected = true;
+
+                let start = getRoomCoord(room1), end = getRoomCoord(room2);
+                let startX = start.x;
+                let startY = start.y;
+                let endX = end.x;
+                let endY = end.y;
+                let deltaX = endX > startX ? 1 : -1;
+                let deltaY = endY > startY ? 1 : -1;
+                endX += deltaX;
+                endY += deltaY;
+
+                if (randBoolean(.5)) {
+                    _.each(_.range(startX, endX, deltaX), (x) => {
+                        walls[x][startY] = false;
+                    });
+                    endX -= deltaX;
+                    _.each(_.range(startY, endY, deltaY), (y) => {
+                        walls[endX][y] = false;
+                    });
+                } else {
+                    _.each(_.range(startY, endY, deltaY), (y) => {
+                        walls[startX][y] = false;
+                    });
+                    endY -= deltaY;
+                    _.each(_.range(startX, endX, deltaX), (x) => {
+                        walls[x][endY] = false;
+                    });
+                }
+            }
+        });
+    };
+
+    //connectRooms = () => {_.each(rooms, (room) => {room.connected = true;});}
+
+    let roomDistance = (room1, room2) => {
+        let distX = Math.abs(room1.centerX - room2.centerX);
+        let distY = Math.abs(room1.centerY - room2.centerY);
+        distX -= room1.width + room2.width;
+        distY -= room1.height + room2.height;
+        distX = Math.max(distX, 0);
+        distY = Math.max(distY, 0);
+        return distX + distY;
+    };
+
+    let fillRoomWalls = () => {
+        _.each(rooms, (room) => {
+            if (room.connected)
+                _.each(_.range(room.left + 1, room.right), (x) => {
+                    _.each(_.range(room.top + 1, room.bottom), (y) => {
+                        walls[x][y] = false;
+                    });
+                });
+        });
+    };
+
+    let findSpawns = () => {
+        spawns = [];
+        _.times(2, (i) => {
+            spawns[i] = getRoomCoord(rooms[i]);
+        });
+    };
+
+    let getRoomCoord = (room) => {
+        return {
+            x: randInt(room.left + 1, room.right - 1),
+            y: randInt(room.top + 1, room.bottom - 1)
+        };
+    };
+
+    let getWalls = () => {
+        return walls;
+    };
+
+    let getSpawn = (i) => {
+        return spawns[i];
+    };
+
+    return {
+        generate: generate,
+        getWalls: getWalls,
+        getSpawn: getSpawn
+    };
+};
