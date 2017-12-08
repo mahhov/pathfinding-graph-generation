@@ -70,20 +70,6 @@ let init = () => {
     window.onload = initCanvas;
 };
 
-// --- util ---
-
-let randBoolean = (trueWeight) => {
-    return Math.random() < trueWeight;
-};
-
-let randDouble = (min, max) => {
-    return Math.random() * (max - min) + min;
-};
-
-let randInt = (min, max) => {
-    return parseInt(Math.random() * (max - min)) + min;
-};
-
 let update = () => {
     if (startCoord && goalCoord) {
         let aStar = astarMain(rect, startCoord, goalCoord);
@@ -112,7 +98,7 @@ let refreshCanvas = () => {
         // draw graph edges
         _.each(graph, (node) => {
             _.each(node.connected, (connected) => {
-                drawLine(createLine(node.coord.x, node.coord.y, connected.neighbor.coord.x, connected.neighbor.coord.y), drawColors[graphColor], 1);
+                drawCanvasLine(createLine(node.coord.x, node.coord.y, connected.neighbor.coord.x, connected.neighbor.coord.y), drawColors[graphColor], 1);
             });
         });
     }
@@ -120,7 +106,7 @@ let refreshCanvas = () => {
     if (pathOverlay) {
         // draw path
         _.times(path.length - 1, (i) => {
-            drawLine(createLine(path[i].x, path[i].y, path[i + 1].x, path[i + 1].y), drawColors[pathNode], 4);
+            drawCanvasLine(createLine(path[i].x, path[i].y, path[i + 1].x, path[i + 1].y), drawColors[pathNode], 4);
         });
         _.each(path, (coord) => {
             drawCanvasRect(createRectSmall(coord.x, coord.y, .3), drawColors[pathNode], true)
@@ -131,41 +117,6 @@ let refreshCanvas = () => {
         drawCanvasRect(createRect(goalCoord.x, goalCoord.y), drawColors[goal], true);
         drawCanvasRect(createRect(startCoord.x, startCoord.y), drawColors[start], true);
     }
-};
-
-let createRect = (x, y) => {
-    return {
-        x: x * rectWidth,
-        y: y * rectHeight,
-        width: rectWidth,
-        height: rectHeight
-    };
-};
-
-let createRectSmall = (x, y, size) => {
-    let shift = (1 - size) / 2;
-    return {
-        x: (x + shift) * rectWidth,
-        y: (y + shift) * rectHeight,
-        width: rectWidth * size,
-        height: rectHeight * size
-    };
-};
-
-let createLine = (x1, y1, x2, y2) => {
-    return {
-        x1: (x1 + .5) * rectWidth,
-        y1: (y1 + .5) * rectHeight,
-        x2: (x2 + .5) * rectWidth,
-        y2: (y2 + .5) * rectHeight
-    };
-};
-
-let getCoord = (x, y) => {
-    return {
-        x: parseInt(x / rectWidth),
-        y: parseInt(y / rectHeight)
-    };
 };
 
 let getRect = (coord) => {
@@ -192,82 +143,5 @@ let setRect = (coord, value) => {
 let setDraw = (value) => {
     draw = value;
 }
-
-// --- canvas drawing ---
-
-let drawCanvasClear = () => {
-    ctx.fillStyle = 'white';
-    ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
-};
-
-let drawCanvasRect = (rect, color, fill) => {
-    if (fill) {
-        ctx.fillStyle = color;
-        ctx.fillRect(rect.x, rect.y, rect.width, rect.height);
-    } else {
-        ctx.strokeStyle = color;
-        ctx.strokeRect(rect.x, rect.y, rect.width, rect.height);
-    }
-};
-
-let drawLine = (line, color, width) => {
-    ctx.strokeStyle = color;
-    ctx.lineWidth = width;
-    ctx.beginPath();
-    ctx.moveTo(line.x1, line.y1);
-    ctx.lineTo(line.x2, line.y2);
-    ctx.stroke();
-};
-
-// --- input ---
-let emptyMap = () => {
-    initRectRand(0);
-    update();
-};
-
-let randomMap = () => {
-    initRectRand(.3);
-    update();
-}
-
-let houseMap = () => {
-    initRectHouse();
-    update();
-}
-
-let toggleEndpointOverlay = () => {
-    endpointOverlay = !endpointOverlay;
-    refreshCanvas();
-}
-
-let toggleGraphOverlay = () => {
-    graphOverlay = !graphOverlay;
-    refreshCanvas();
-}
-
-let togglePathOverlay = () => {
-    pathOverlay = !pathOverlay;
-    refreshCanvas();
-}
-
-let handleMouseDown = (x, y) => {
-    mouseDown = true;
-    if (draw === empty)
-        draw = getRect(getCoord(x, y)) ? empty : wall;
-    handleMouseMove(x, y);
-};
-
-let handleMouseUp  = () => {
-    mouseDown = false;
-    draw = empty;
-};
-
-let handleMouseMove = (x, y) => {
-    if (mouseDown) {
-        setRect(getCoord(x, y), draw);
-        update();
-    }
-};
-
 
 init();
