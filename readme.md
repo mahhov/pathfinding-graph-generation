@@ -4,6 +4,10 @@
 
 see title
 
+## Interactive Demo
+
+https://path-finding-graph-generation.herokuapp.com
+
 ## Demos
 
 ![demo gif 1](../master/gifys/basic.gif)
