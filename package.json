@@ -2,6 +2,9 @@
   "name": "astar",
   "version": "1.0.0",
   "main": "server.js",
+  "scripts": {
+    "start": "db-migrate up; node server.js"
+  },
   "dependencies": {
     "express": "^4.16.2",
     "pg-promise": "^7.3.2",
