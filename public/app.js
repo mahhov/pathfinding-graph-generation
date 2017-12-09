@@ -1,8 +1,8 @@
 //  --- setup ---
 
-let ctx;
+let mmlSpan, imnSpan, ratioSpan, ctx;
 
-let canvasWidth = 1000, canvasHeight = 1000;
+let canvasWidth = 950, canvasHeight = 950;
 let width = 50, height = 50;
 let rectWidth = canvasWidth / width, rectHeight = canvasHeight / height;
 
@@ -18,6 +18,9 @@ let drawColors = ['#eee', '#888', '#33d', '#d33', '#050', '#099'];
 let endpointOverlay = true, graphOverlay = true, pathOverlay = true;
 
 let initCanvas = () => {
+    mmlSpan = document.getElementById('mmlSpan');
+    imnSpan = document.getElementById('imnSpan');
+    ratioSpan = document.getElementById('ratioSpan');
     let canvas = document.getElementById('myCanvas');
     ctx = canvas.getContext('2d');
     canvas.width = canvasWidth;
@@ -76,7 +79,17 @@ let update = () => {
         path = aStar.path;
         graph = aStar.graph;
     }
+    refreshText();
     refreshCanvas();
+};
+
+let refreshText = () => {
+    let mapAreas = _.countBy(_.flatten(rect), (r) => {
+        return r;
+    });
+    mmlSpan.innerText = mapAreas['0'];
+    imnSpan.innerText = graph.length;
+    ratioSpan.innerText = parseInt(graph.length / mapAreas['0'] * 1000) / 1000;
 };
 
 let refreshCanvas = () => {
